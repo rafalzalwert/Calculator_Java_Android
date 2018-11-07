@@ -112,9 +112,11 @@ public class MainActivity extends AppCompatActivity {
             String txt = txtScreen.getText().toString();
             Expression expression = new ExpressionBuilder(txt).build();
             try {
+
                 double result = expression.evaluate();
+                String equationWithresult=txt+"="+Double.toString(result);
                 txtScreen.setText(Double.toString(result));
-                history.add(Double.toString(result));
+                history.add(equationWithresult);
                 lastDot = true;
             } catch (ArithmeticException ex) {
                 txtScreen.setText("Error");
