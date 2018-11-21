@@ -1,7 +1,10 @@
 package com.example.zalwe.calculator;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -14,17 +17,19 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 import java.util.ArrayList;
 
 
+
 public class MainActivity extends AppCompatActivity {
 
 
-    private int[] numericButtons = {R.id.btnZero, R.id.btnOne, R.id.btnTwo, R.id.btnThree, R.id.btnFour, R.id.btnFive, R.id.btnSix, R.id.btnSeven, R.id.btnEight, R.id.btnNine};
-    private int[] operatorButtons = {R.id.btnAdd, R.id.btnSubtract, R.id.btnMultiply, R.id.btnDivide,R.id.btnHistory};
+    private int[] numericButtons = {R.id.btnZero, R.id.btnOne, R.id.btnTwo, R.id.btnThree, R.id.btnFour, R.id.btnFive, R.id.btnSix, R.id.btnSeven, R.id.btnEight, R.id.btnNine,
+    R.id.btnBracketRight,R.id.btnBracketLeft,R.id.btnSubtract};
+    private int[] operatorButtons = {R.id.btnAdd, R.id.btnDivide, R.id.btnMultiply, R.id.btnHistory,};
     private TextView txtScreen;
     private boolean lastNumeric;
     private boolean stateError;
     private boolean lastDot;
-    public static ArrayList<String> history;
-
+    public static ArrayList<Long> history;
+    FeedReaderManager helper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +37,10 @@ public class MainActivity extends AppCompatActivity {
         this.txtScreen = (TextView) findViewById(R.id.txtScreen);
         setNumericOnClickListener();
         setOperatorOnClickListener();
+        helper = new FeedReaderManager(this);
+        history = new ArrayList<Long>();
 
-        history = new ArrayList<String>();
+
     }
 
 
@@ -111,21 +118,38 @@ public class MainActivity extends AppCompatActivity {
         if (lastNumeric && !stateError) {
             String txt = txtScreen.getText().toString();
             Expression expression = new ExpressionBuilder(txt).build();
-            try {
-
-                double result = expression.evaluate();
-                String equationWithresult=txt+"="+Double.toString(result);
-                txtScreen.setText(Double.toString(result));
-                history.add(equationWithresult);
-                lastDot = true;
-            } catch (ArithmeticException ex) {
-                txtScreen.setText("Error");
-                stateError = true;
-                lastNumeric = false;
-            }
+            tryGetEqution(txt, expression);
         }
     }
 
+    @SuppressLint("SetTextI18n")
+    private void tryGetEqution(String txt, Expression expression) {
+        try {
+
+            double result = expression.evaluate();
+            String equationWithresult=txt+"="+Double.toString(result);
+            isInteger(result);
+           helper.putDataIntoSqlliteDb(equationWithresult);
+            lastDot = true;
+        } catch (ArithmeticException ex) {
+            txtScreen.setText("Error");
+            stateError = true;
+            lastNumeric = false;
+        }
+    }
+
+    private void isInteger(Double result) {
 
 
+        String integer = Double.toString(result);
+        String integerSubstred = integer.substring(integer.length() - 2, integer.length());
+
+        if (!integerSubstred.equals(".0")) {
+            txtScreen.setText(integer);
+        } else {
+            txtScreen.setText(integer.substring(0,integer.length()-2));
+        }
+
+    }
+ 
 }
