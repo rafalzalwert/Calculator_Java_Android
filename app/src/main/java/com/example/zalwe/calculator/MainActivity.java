@@ -43,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStop() {
+        
+        super.onStop();
+    }
 
     private void setNumericOnClickListener() {
         View.OnClickListener listener = new View.OnClickListener() {
@@ -91,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnClear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                txtScreen.setText("");
+                cleanText();
                 lastNumeric = false;
                 stateError = false;
                 lastDot = false;
@@ -106,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnHistory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                cleanText();
                 Intent intent = new Intent(MainActivity.this,History.class);
                 startActivity(intent);
             }
@@ -126,17 +132,24 @@ public class MainActivity extends AppCompatActivity {
     private void tryGetEqution(String txt, Expression expression) {
         try {
 
-            double result = expression.evaluate();
-            String equationWithresult=txt+"="+Double.toString(result);
+            double result = getResult(txt, expression);
             isInteger(result);
-           helper.putDataIntoSqlliteDb(equationWithresult);
-            lastDot = true;
         } catch (ArithmeticException ex) {
             txtScreen.setText("Error");
             stateError = true;
             lastNumeric = false;
         }
     }
+
+    private double getResult(String txt, Expression expression) {
+        double result = expression.evaluate();
+        String equationWithresult=txt+"="+Double.toString(result);
+        helper.putDataIntoSqlliteDb(equationWithresult);
+        lastDot = true;
+        return result;
+    }
+
+
 
     private void isInteger(Double result) {
 
@@ -150,6 +163,9 @@ public class MainActivity extends AppCompatActivity {
             txtScreen.setText(integer.substring(0,integer.length()-2));
         }
 
+    }
+    private void cleanText(){
+        txtScreen.setText("");
     }
  
 }
