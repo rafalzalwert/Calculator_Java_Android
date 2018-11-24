@@ -8,8 +8,10 @@
         android:id="@+id/txtScreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
         android:gravity="right|center_vertical"
         android:maxLength="16"
         android:padding="10dp"
@@ -159,12 +161,12 @@
             android:layout_weight="1">
 
             <Button
-                android:id="@+id/btnDot"
+                android:id="@+id/btnBracketLeft"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/buttonoperation"
-                android:text="."
+                android:background="@drawable/button"
+                android:text="("
                 android:textSize="30sp" />
 
             <Button
@@ -177,12 +179,12 @@
                 android:textSize="30sp" />
 
             <Button
-                android:id="@+id/btnClear"
+                android:id="@+id/btnBracketRight"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/buttonoperation"
-                android:text="C"
+                android:background="@drawable/button"
+                android:text=")"
                 android:textSize="30sp" />
 
             <Button
@@ -201,21 +203,21 @@
             android:layout_weight="1">
 
             <Button
-                android:id="@+id/btnBracketLeft"
+                android:id="@+id/btnDot"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/button"
-                android:text="("
+                android:background="@drawable/buttonoperation"
+                android:text="."
                 android:textSize="30sp" />
 
             <Button
-                android:id="@+id/btnBracketRight"
+                android:id="@+id/btnClear"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/button"
-                android:text=")"
+                android:background="@drawable/buttonoperation"
+                android:text="C"
                 android:textSize="30sp" />
 
             <Button

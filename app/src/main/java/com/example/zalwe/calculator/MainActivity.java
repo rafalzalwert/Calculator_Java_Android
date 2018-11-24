@@ -1,10 +1,7 @@
 package com.example.zalwe.calculator;
 
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -29,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean stateError;
     private boolean lastDot;
     public static ArrayList<Long> history;
-    FeedReaderManager helper;
+    DbOperations helper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         this.txtScreen = (TextView) findViewById(R.id.txtScreen);
         setNumericOnClickListener();
         setOperatorOnClickListener();
-        helper = new FeedReaderManager(this);
+        helper = new DbOperations(this);
         history = new ArrayList<Long>();
 
 
@@ -45,8 +42,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        
+        onEqual();
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        onEqual();
+        super.onDestroy();
     }
 
     private void setNumericOnClickListener() {
@@ -111,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnHistory).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cleanText();
                 Intent intent = new Intent(MainActivity.this,History.class);
                 startActivity(intent);
             }

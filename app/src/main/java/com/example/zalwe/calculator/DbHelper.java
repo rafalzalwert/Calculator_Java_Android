@@ -1,15 +1,19 @@
 package com.example.zalwe.calculator;
 
-public class DbHelper {
-    int Id;
-    String eqauation;
+class DbHelper {
+    private int data_id;
+    private String eqauation;
 
-    public DbHelper(int id, String eqauation) {
-        Id = id;
+    DbHelper(int id, String eqauation) {
+       data_id = id;
         this.eqauation = eqauation;
     }
 
-    public String getEqauation() {
+    String getEqauation() {
         return eqauation;
+    }
+
+    int getDataId() {
+        return data_id;
     }
 }
