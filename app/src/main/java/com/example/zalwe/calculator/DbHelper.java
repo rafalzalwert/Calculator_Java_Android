@@ -1,19 +1,36 @@
 package com.example.zalwe.calculator;
 
-class DbHelper {
-    private int data_id;
-    private String eqauation;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
-    DbHelper(int id, String eqauation) {
-       data_id = id;
-        this.eqauation = eqauation;
+class DbHelper extends SQLiteOpenHelper {
+
+    private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "HistoryActivity.db";
+    private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " +
+            DbSettingsPropertis.DbEntry.TABLE_NAME + "(" +
+            DbSettingsPropertis.DbEntry.COLUMN_NAME_EQUATION + " TEXT)";
+    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " +
+            DbSettingsPropertis.DbEntry.TABLE_NAME;
+
+
+    DbHelper(Context context){
+        super(context,DATABASE_NAME,null,DATABASE_VERSION);
     }
 
-    String getEqauation() {
-        return eqauation;
-    }
 
-    int getDataId() {
-        return data_id;
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(SQL_CREATE_ENTRIES);
+    }
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL(SQL_DELETE_ENTRIES);
+        onCreate(db);
+    }
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
     }
 }

@@ -18,156 +18,100 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
 
-    private int[] numericButtons = {R.id.btnZero, R.id.btnOne, R.id.btnTwo, R.id.btnThree, R.id.btnFour, R.id.btnFive, R.id.btnSix, R.id.btnSeven, R.id.btnEight, R.id.btnNine,
-    R.id.btnBracketRight,R.id.btnBracketLeft,R.id.btnSubtract};
-    private int[] operatorButtons = {R.id.btnAdd, R.id.btnDivide, R.id.btnMultiply, R.id.btnHistory,};
+    private int[] numericButtons = {R.id.btnZero, R.id.btnOne, R.id.btnTwo, R.id.btnThree,
+            R.id.btnFour, R.id.btnFive, R.id.btnSix, R.id.btnSeven, R.id.btnEight, R.id.btnNine};
+
+
     private TextView txtScreen;
-    private boolean lastNumeric;
-    private boolean stateError;
-    private boolean lastDot;
-    public static ArrayList<Long> history;
-    DbOperations helper;
+
+    private DbOperations dbOperations;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.txtScreen = (TextView) findViewById(R.id.txtScreen);
-        setNumericOnClickListener();
-        setOperatorOnClickListener();
-        helper = new DbOperations(this);
-        history = new ArrayList<Long>();
 
+        txtScreen = findViewById(R.id.txtScreen);
 
-    }
+        DbHelper dbHelper = new DbHelper(getBaseContext());
+        dbOperations = new DbOperations(dbHelper);
 
-    @Override
-    protected void onStop() {
-        onEqual();
-        super.onStop();
-    }
+       setNumericOnClickListener();
 
-    @Override
-    protected void onDestroy() {
-        onEqual();
-        super.onDestroy();
-    }
+        final Button buttonDiv = findViewById(R.id.btnDivide);
+        final Button buttonMulti = findViewById(R.id.btnMultiply);
+        final Button buttonAdd = findViewById(R.id.btnAdd);
+        final Button buttonSub = findViewById(R.id.btnSubtract);
+        Button buttonHistory = findViewById(R.id.btnHistory);
+        Button buttonC = findViewById(R.id.btnClear);
+        final Button buttonEval = findViewById(R.id.btnEqual);
+        final Button buttonDot = findViewById(R.id.btnDot);
+        buttonC.setOnClickListener(v -> txtScreen.setText(""));
 
-    private void setNumericOnClickListener() {
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Button button = (Button) v;
-                if (stateError) {
-                    txtScreen.setText(button.getText());
-                    stateError = false;
-                } else {
-                    txtScreen.append(button.getText());
-                }
-                lastNumeric = true;
+        buttonHistory.setOnClickListener(v -> showHistory());
+
+        buttonDot.setOnClickListener(v -> {
+            if(ExpresionValidation.isOperationCanBeEvaluate(txtScreen.getText().toString())){
+                txtScreen.append(buttonDot.getText());
             }
+        });
+        buttonDiv.setOnClickListener(v -> {
+            if(ExpresionValidation.isOperationCanBeEvaluate(txtScreen.getText().toString())){
+                txtScreen.append(buttonDiv.getText());
+            }
+        });
+        buttonMulti.setOnClickListener(v -> {
+            if(ExpresionValidation.isOperationCanBeEvaluate(txtScreen.getText().toString())){
+                txtScreen.append(buttonMulti.getText());
+            }
+        });
+
+        buttonAdd.setOnClickListener(v -> {
+            if(ExpresionValidation.isOperationCanBeEvaluate(txtScreen.getText().toString())){
+                txtScreen.append(buttonAdd.getText());
+            }
+        });
+        buttonSub.setOnClickListener(v -> {
+            if(ExpresionValidation.isOperationCanBeEvaluate(txtScreen.getText().toString())){
+                txtScreen.append(buttonSub.getText());
+            }
+        });
+        buttonEval.setOnClickListener(v -> {
+            String expression =  txtScreen.getText().toString();
+            ExpresionValidation.onEqual(expression,txtScreen);
+            String expressionWithResult = txtScreen.getText().toString();
+            if(!expressionWithResult.equals("Error")){
+                dbOperations.putDataIntoSqlliteDb(expressionWithResult);
+            }
+        });
+
+    }
+    private void setNumericOnClickListener() {
+        View.OnClickListener listener = v -> {
+            Button button = (Button) v;
+            txtScreen.append(button.getText());
         };
         for (int id : numericButtons) {
             findViewById(id).setOnClickListener(listener);
         }
     }
 
-    private void setOperatorOnClickListener() {
-        View.OnClickListener listener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (lastNumeric && !stateError) {
-                    Button button = (Button) v;
-                    txtScreen.append(button.getText());
-                    lastNumeric = false;
-                    lastDot = false;
-                }
-            }
-        };
-        for (int id : operatorButtons) {
-            findViewById(id).setOnClickListener(listener);
-        }
-        findViewById(R.id.btnDot).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (lastNumeric && !stateError && !lastDot) {
-                    txtScreen.append(".");
-                    lastNumeric = false;
-                    lastDot = true;
-                }
-            }
-        });
-        findViewById(R.id.btnClear).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cleanText();
-                lastNumeric = false;
-                stateError = false;
-                lastDot = false;
-            }
-        });
-        findViewById(R.id.btnEqual).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onEqual();
-            }
-        });
-        findViewById(R.id.btnHistory).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,History.class);
-                startActivity(intent);
-            }
-        });
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
-
-    @SuppressLint("SetTextI18n")
-    private void onEqual() {
-        if (lastNumeric && !stateError) {
-            String txt = txtScreen.getText().toString();
-            Expression expression = new ExpressionBuilder(txt).build();
-            tryGetEqution(txt, expression);
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void tryGetEqution(String txt, Expression expression) {
-        try {
-
-            double result = getResult(txt, expression);
-            isInteger(result);
-        } catch (ArithmeticException ex) {
-            txtScreen.setText("Error");
-            stateError = true;
-            lastNumeric = false;
-        }
-    }
-
-    private double getResult(String txt, Expression expression) {
-        double result = expression.evaluate();
-        String equationWithresult=txt+"="+Double.toString(result);
-        helper.putDataIntoSqlliteDb(equationWithresult);
-        lastDot = true;
-        return result;
+    @Override
+    protected void onDestroy() {
+        dbOperations.closeConnection();
+        super.onDestroy();
     }
 
 
 
-    private void isInteger(Double result) {
-
-
-        String integer = Double.toString(result);
-        String integerSubstred = integer.substring(integer.length() - 2, integer.length());
-
-        if (!integerSubstred.equals(".0")) {
-            txtScreen.setText(integer);
-        } else {
-            txtScreen.setText(integer.substring(0,integer.length()-2));
-        }
-
-    }
-    private void cleanText(){
+    private void showHistory() {
+        Intent intent = new Intent(this, HistoryActivity.class);
         txtScreen.setText("");
+        startActivity(intent);
     }
- 
 }

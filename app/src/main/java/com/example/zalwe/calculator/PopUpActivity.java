@@ -1,6 +1,5 @@
 package com.example.zalwe.calculator;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -35,13 +34,7 @@ public class PopUpActivity extends AppCompatActivity {
 
 
         getWindow().setAttributes(params);
-        okeyBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                finish();
-            }
-        });
+        okeyBtn.setOnClickListener(v -> finish());
 
 
     }

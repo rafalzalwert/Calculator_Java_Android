@@ -1,70 +1,65 @@
 package com.example.zalwe.calculator;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.zalwe.calculator.DbSettingsPropertis.FeedEntry.COLUMN_NAME_DATA_ID;
-import static com.example.zalwe.calculator.DbSettingsPropertis.FeedEntry.TABLE_NAME;
-import static com.example.zalwe.calculator.DbSettingsPropertis.SQL_CREATE_ENTRIES;
-import static com.example.zalwe.calculator.DbSettingsPropertis.SQL_DELETE_ENTRIES;
 
-public class DbOperations extends SQLiteOpenHelper {
-    DbHelper dbHelper;
-    private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "FeedReader.db";
 
-    public DbOperations(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+class DbOperations {
+
+    private DbHelper dbHelper;
+
+    DbOperations(DbHelper dbHelper) {
+        this.dbHelper = dbHelper;
     }
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
-    }
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
-        onCreate(db);
-    }
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db, oldVersion, newVersion);
-    }
+
     void putDataIntoSqlliteDb(String equation){
-        SQLiteDatabase db = getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(DbSettingsPropertis.FeedEntry.COLUMN_NAME_EQUATION, equation);
+        values.put(DbSettingsPropertis.DbEntry.COLUMN_NAME_EQUATION, equation);
 
 
-        db.insert(TABLE_NAME, null, values);
-
-    }
-    private Cursor getEquation(){
-        SQLiteDatabase sqLiteDatabase =getReadableDatabase();
-
-        return sqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME,null);
+        db.insert(DbSettingsPropertis.DbEntry.TABLE_NAME, null, values);
 
     }
-    static void getEquationsFromDb(DbOperations dbOperations, List<DbHelper> equationList) {
+    List<String> getDataFromDb(){
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = dbOperations.getEquation();
-        if(cursor.moveToFirst()){
-            setListData(equationList, cursor);
+        Cursor cursor = db.query(
+                DbSettingsPropertis.DbEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        final List<String> equations = new ArrayList<>();
+
+        while(cursor.moveToNext()){
+            String equation = cursor.getString(
+                    cursor.getColumnIndexOrThrow(DbSettingsPropertis.DbEntry.COLUMN_NAME_EQUATION));
+
+            equations.add(equation);
+
         }
-    }
+        cursor.close();
 
-    private static void setListData(List<DbHelper> equationList, Cursor cursor) {
-        while (cursor.moveToNext()) {
-            equationList.add(new DbHelper(
-                    cursor.getInt(0),
-                    cursor.getString(1)
-            ));
-        }
+        return equations;
     }
     void deleteData() {
-        SQLiteDatabase db = getWritableDatabase();
-        db.delete(TABLE_NAME, "1", null);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(DbSettingsPropertis.DbEntry.TABLE_NAME, "1", null);
+    }
+
+    void closeConnection(){
+        dbHelper.close();
     }
 }
